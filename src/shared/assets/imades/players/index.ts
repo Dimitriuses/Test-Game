@@ -14,6 +14,8 @@ import char_11 from "./char_11.png"
 import char_12 from "./char_12.png"
 import char_13 from "./char_13.png"
 
+import char_los from "./char_los.png"
+
 export const CharsResources = {
   Char1: new ImageSource(char_1),
   Char2: new ImageSource(char_2),
@@ -28,4 +30,6 @@ export const CharsResources = {
   Char11: new ImageSource(char_11),
   Char12: new ImageSource(char_12),
   Char13: new ImageSource(char_13),
+
+  CharLos: new ImageSource(char_los),
 } as const;

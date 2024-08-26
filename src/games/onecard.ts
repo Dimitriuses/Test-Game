@@ -1,4 +1,4 @@
-import { Actor, Color, DefaultLoader, Engine, Resource, Scene, SceneActivationContext, vec, Vector } from 'excalibur';
+import { Actor, Color, DefaultLoader, Engine, Resource, Scene, SceneActivationContext, Timer, vec, Vector } from 'excalibur';
 import { Card, CardComparisonOperator, CardDeck, CardDeckType } from '../shared/classes/card';
 import { CardResources, CharsResources, IMAGE_CARD_HEIGHT, IMAGE_CARD_WIDTH } from '../shared/assets';
 import { cardToResource, delay } from '../shared/utilites';
@@ -10,28 +10,38 @@ import { CardDeckActor } from '../shared/actors/cardDeckActor';
 
 export class OneCardGameScene extends Scene{
 
-  private _cardsDeck: CardDeck;
+  //private _cardsDeck: CardDeck;
   private _cardDeckActor: CardDeckActor;
   private cardActors: CardActor[];
   private bufCardActors: CardActor[];
 
+  private isAuto: boolean;
+
   private Players: CardPlayerActor[];
   private get isAllowedTakeCard():boolean { return this.cardActors.length < 2};
+  //private isAlowedToClickOnPlayer: boolean;
   //private cardsInTable:  Card[];
 
   private _sortButton: Button;
   private _shuffleButton: Button;
 
+  private _autoButton: Button;
+
+  private _autoTimer: Timer;
+
   constructor(){
     super();
 
-    this._cardsDeck = new CardDeck();
+    this.isAuto = false;
+
+    //this._cardsDeck = new CardDeck();
     this._cardDeckActor = new CardDeckActor({ height: IMAGE_CARD_HEIGHT/2, width: IMAGE_CARD_WIDTH/2, pos: new Vector(100, 500)});
     this._cardDeckActor.events.on("click", () => { this.dealCardsToAllPlayers() });
     this.cardActors = [];
     this.bufCardActors = [];
 
     this.Players = []; 
+    //this.isAlowedToClickOnPlayer = true;
     //this.cardsInTable = [];
 
     this._sortButton = new Button({ width: 250, height: 50, pos: new Vector( 550, 450 ), color: Color.White }, "Sort", Color.Red);
@@ -39,6 +49,16 @@ export class OneCardGameScene extends Scene{
 
     this._shuffleButton = new Button({ width: 250, height: 50, pos: new Vector( 550, 510 ), color: Color.White }, "Shuffle", Color.Red);
     this._shuffleButton.events.on("click", () => {this.deckShuffle(); })
+
+    this._autoButton = new Button({ width: 50, height: 50, pos: new Vector( 750, 100 ), color: Color.White }, "Auto", Color.Red, true);
+    this._autoButton.events.on("click", () => { //console.log(this._cardDeckActor.lenght);
+
+      if(this._cardDeckActor.lenght == 0)this.isAuto = this._autoButton.TogleStatus;
+      if(this.isAuto){this._autoTimer.start()}else{ this._autoTimer.stop();}
+    });
+
+    //this.on("postupdate", async () => { await this.updateWithEv(); });
+    this._autoTimer = new Timer({ fcn: () => { this.autoTakeCard(); }, repeats: true, interval: 1000  })
     
   }
 
@@ -51,14 +71,12 @@ export class OneCardGameScene extends Scene{
     for (const res of Object.values(CharsResources)) {
       loader.addResource(res);
     }
-
-    
     
   }
 
   onInitialize(engine: Engine): void {
     let countOfPlayers = 4;
-    this._cardsDeck = new CardDeck({deckType: CardDeckType.Deck36});
+    //this._cardsDeck = new CardDeck({deckType: CardDeckType.Deck36});
     this.engine.add(this._cardDeckActor);
     //this.showAllCards();
 
@@ -67,6 +85,9 @@ export class OneCardGameScene extends Scene{
 
     //this.setupDefaultCardIntable(countOfPlayers);
     this.setupAllPlayerActors(countOfPlayers);
+
+    this.engine.add(this._autoButton);
+    this.engine.add(this._autoTimer);
   }
 
   onActivate(context: SceneActivationContext<unknown>): void {
@@ -87,12 +108,13 @@ export class OneCardGameScene extends Scene{
     //this.showAllCards();
   }
 
+
   setupAllPlayerActors(countOfPlayers: number){
     //const countOfPlayers = 4;
 
     for(let i = 0; i < countOfPlayers; i++){
       let p = new CardPlayerActor({width: 100, height: 100, pos: new Vector(100 + i*175, 100), z: 1}, CharsResources.Char1.toSprite())
-      p.events.on("click", (e) => { this.takeCardFromPlayer(p); })
+      p.events.on("click", (e) => { /*if(this.isAuto)this.takeCardFromPlayer(p);*/ p.playerLos(); });
       this.Players.push(p);
       this.engine.add(p);
     }
@@ -120,13 +142,13 @@ export class OneCardGameScene extends Scene{
 
   showAllCards(){
     //console.log(this.cardActors);
-    this._cardsDeck.Cards.forEach( (card, x) => {
-      //console.log(cardToResource(card));
-      //let cardSprite = cardToResource(card).toSprite();
-      let cA = new CardActor({height: 95, width: 70, pos: new Vector(50 + (x%9) *70, 50 + Math.floor(x/9)*95)}, card);
-      this.cardActors.push(cA);
-      this.engine.add(cA);
-    })
+    // this._cardsDeck.Cards.forEach( (card, x) => {
+    //   //console.log(cardToResource(card));
+    //   //let cardSprite = cardToResource(card).toSprite();
+    //   let cA = new CardActor({height: 95, width: 70, pos: new Vector(50 + (x%9) *70, 50 + Math.floor(x/9)*95)}, card);
+    //   this.cardActors.push(cA);
+    //   this.engine.add(cA);
+    // })
   }
 
   async takeCardFromPlayer(player: CardPlayerActor){
@@ -191,6 +213,8 @@ export class OneCardGameScene extends Scene{
       
     }
     //this.cardActors = [];
+    ownerA.isLos
+    ownerB.isLos
     
   }
 
@@ -205,15 +229,35 @@ export class OneCardGameScene extends Scene{
 
 
 
+  async autoTakeCard(){
+    //console.log("auto");
+    let currentIndex = this.Players.indexOf(this.Players.filter(p => p.isSelected)[0] || undefined);
+    if(currentIndex != -1){
+      //console.log(currentIndex);
+      let nextPlayerIndex = (currentIndex >= this.Players.length - 1)? 0: currentIndex + 1;
+      
+      await this.takeCardFromPlayer(this.Players[currentIndex]);
+      await this.takeCardFromPlayer(this.Players[nextPlayerIndex]);
+
+
+      this.Players[currentIndex].isSelected = false;
+      this.Players[nextPlayerIndex].isSelected = true;
+    } else {
+      this.Players[0].isSelected = true;
+    }
+    
+
+  }
+
   deckSort(){
     this.clearAll();
-    this._cardsDeck.sort();
+    //his._cardsDeck.sort();
     this.showAllCards();
   }
 
   deckShuffle(){
     this.clearAll();
-    this._cardsDeck.shuffle();
+    //this._cardsDeck.shuffle();
     this.showAllCards();
   }
 

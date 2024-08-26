@@ -1,4 +1,4 @@
-import { Actor, ActorArgs, Engine, EventEmitter, GameEvent, Sprite, Text, Vector } from 'excalibur';
+import { Actor, ActorArgs, Color, Engine, EventEmitter, GameEvent, Sprite, Text, Vector } from 'excalibur';
 import { Card } from '../classes/card';
 import { CardActor } from './cardActor';
 import { CharsResources } from '../assets/imades/players';
@@ -22,11 +22,16 @@ export class CardPlayerActor extends Actor{
   private uperText: Text;
   public set Card(value: Card | Card[] ) { this._player.dealACards(value); this.updateText(); }
   public get Card():Card | undefined { let output = this._player.Card; this.updateText(); return output; }
-
+  public get isLos(): boolean {let output = this._player.lenght == 0; if(output)this.playerLos(); return output };
+  private _isSelected: boolean
+  public get isSelected():boolean { return this._isSelected; };
+  public set isSelected(value) { this._isSelected = value; if(value){this.uperText.color = Color.Red } else { this.uperText.color = Color.Black }   };
   public events = new EventEmitter<ActorEvents & CardPlayerEvents>();
   
   constructor(config?: ActorArgs, playerSprite?: Sprite){
     super(config);
+    //this.isLos = false;
+    this._isSelected = false;
 
     this._player = new Player();
     this._player.Name = "Player " + this._player.id.split('-')[0];
@@ -44,7 +49,18 @@ export class CardPlayerActor extends Actor{
 
     this.on("pointerdown", () => { this.onClick(); });
 
+
+
     
+  }
+
+  playerLos(){
+    let losActor = new Actor({ z: 1});
+    let losSprite = CharsResources.CharLos.toSprite();
+    losSprite.height = this.height;
+    losSprite.width = this.width;
+    losActor.graphics.add(losSprite);
+    this.addChild(losActor);
   }
 
   onInitialize(engine: Engine): void {
@@ -56,7 +72,8 @@ export class CardPlayerActor extends Actor{
   }
 
   updateText() {
-      this.uperText.text = this._player.Name + " " + this._player.lenght;
+    this.uperText.text = this._player.Name + " " + this._player.lenght;
+    //this.isLos = true;
   }
 
   isOwner(card: CardActor):boolean {
@@ -72,7 +89,9 @@ export class CardPlayerActor extends Actor{
   }
 
   onClick(){
-    this.events.emit("click", this);
+    if(!this.isLos){
+      this.events.emit("click", this);
+    }
   }
 
   
