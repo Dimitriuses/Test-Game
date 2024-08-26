@@ -13,6 +13,7 @@ export class OneCardGameScene extends Scene{
   private _cardsDeck: CardDeck;
   private _cardDeckActor: CardDeckActor;
   private cardActors: CardActor[];
+  private bufCardActors: CardActor[];
 
   private Players: CardPlayerActor[];
   private get isAllowedTakeCard():boolean { return this.cardActors.length < 2};
@@ -28,6 +29,7 @@ export class OneCardGameScene extends Scene{
     this._cardDeckActor = new CardDeckActor({ height: IMAGE_CARD_HEIGHT/2, width: IMAGE_CARD_WIDTH/2, pos: new Vector(100, 500)});
     this._cardDeckActor.events.on("click", () => { this.dealCardsToAllPlayers() });
     this.cardActors = [];
+    this.bufCardActors = [];
 
     this.Players = []; 
     //this.cardsInTable = [];
@@ -169,19 +171,23 @@ export class OneCardGameScene extends Scene{
 
     if(!equal){
       if(isH){
-        ownerA.Card = this.cardActors.map(c => c.Card);
+        ownerA.Card = [...this.cardActors.map(c => c.Card), ...this.bufCardActors.map(c => c.Card)];
         //conI = "==>";
         await this.animateWinCard(cardA, cardB);
       } else {
-        ownerB.Card = this.cardActors.map(c => c.Card);
+        ownerB.Card = [...this.cardActors.map(c => c.Card), ...this.bufCardActors.map(c => c.Card)];
         //conI = "<==";
         await this.animateWinCard(cardB, cardA);
       }
     } else { 
       console.log(equal);
-      console.log(this.cardActors)
+      console.log(this.cardActors);
       console.log(cardA.Card.toString() + " === " + cardB.Card.toString());
-
+      this.bufCardActors.push(...this.cardActors);
+      this.cardActors = [];
+      await this.takeCardFromPlayer(ownerA);
+      await this.takeCardFromPlayer(ownerB);
+      this.bufCardActors = [];
       
     }
     //this.cardActors = [];
@@ -190,8 +196,10 @@ export class OneCardGameScene extends Scene{
 
   async animateWinCard(winCard: CardActor, losCard: CardActor){
     let winer = this.Players.filter(p => p.isOwner(winCard))[0];
+    this.bufCardActors.forEach(c => c.actions.moveTo(winCard.pos, 200))
     await losCard.actions.moveTo(winCard.pos, 200).toPromise();
     //this.cardActors.filter(c => !winer.isOwner(c)).forEach( async (c) => { await c.actions.moveTo(winCard.pos, 200).toPromise(); });
+    this.bufCardActors.forEach(c => c.actions.moveTo(winer.pos, 100).callMethod( () => { c.kill(); }));
     this.cardActors.filter(c => c === winCard || c === losCard).forEach( async (c) => { await c.actions.moveTo(winer.pos, 100).callMethod( () => { c.kill(); }).toPromise(); });
   }
 
