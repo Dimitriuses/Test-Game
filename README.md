@@ -34,9 +34,7 @@ scene loads 68 images when you enter it, so it takes a moment the first time.
 ## Status and history
 
 Written in one evening: the whole committed history runs from 20:20 on 2024-08-26 to
-01:33 on 2024-08-27, four commits. Metadata inside one of the card images shows I had been
-poking at it in GIMP as early as 2024-05-06, so the idea sat around for a few months
-before the evening it got built.
+01:33 on 2024-08-27, four commits.
 
 **It runs, and it always did.** That is worth saying because most of the other archived
 repositories in this account do not. Both games are playable start to finish today on
