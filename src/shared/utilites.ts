@@ -1,20 +1,19 @@
-import { ImageSource } from 'excalibur';
 import { Card, CardType, CardValue } from './classes/card';
 import { CardResources } from './assets';
 
-export function enumToArray<T>(enumme):T[]{
-  return Object.keys(enumme).filter(a=> isNaN(Number(a)) === false).map(key=> enumme[key]);
+export function enumToArray<T>(enumme: Record<string, unknown>): T[] {
+  return Object.keys(enumme).filter(a=> isNaN(Number(a)) === false).map(key=> enumme[key] as T);
 }
 
+/** Maps a Card onto the matching entry of CardResources by name, e.g. Queen + Hearts -> QueenHearts. */
 export function cardToResource(card:Card){
-  let cV = enumToArray(CardValue)[card.CardValue];
-  let cT = enumToArray(CardType)[card.CardType];
-  //console.log(cV + "" + cT);
-  if(cV === "Joker"){
+  const cV = enumToArray(CardValue)[card.CardValue];
+  if(cV === 'Joker'){
     return CardResources.Joker;
   }
   else{
-    return Object.values(CardResources)[Object.keys(CardResources).findIndex(rk=> rk == (enumToArray(CardValue)[card.CardValue] + "" + enumToArray(CardType)[card.CardType]))]
+    const name = enumToArray(CardValue)[card.CardValue] + '' + enumToArray(CardType)[card.CardType];
+    return Object.values(CardResources)[Object.keys(CardResources).findIndex(rk=> rk == name)];
   }
 }
 

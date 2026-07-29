@@ -11,6 +11,10 @@ import {
 } from 'excalibur';
 import { Alert } from '../shared/actors/alertActor';
 
+/**
+ * Breakout. The paddle follows the pointer, the ball bounces off the walls, the paddle
+ * and the bricks, and clearing every brick wins. Letting the ball leave the viewport loses.
+ */
 export class DefaultGameScene extends Scene{
 
   private _padde:Actor;
@@ -18,10 +22,9 @@ export class DefaultGameScene extends Scene{
   private _bricks: Actor[] = [];
   private ballSpeed: Vector;
   private ballFirstPosition: Vector;
-  private colliding: Boolean;
+  private colliding: boolean;
   private alert: Alert;
-  private isPaused:boolean = false;
-
+  private isPaused = false;
 
   constructor(){
     super();
@@ -48,11 +51,9 @@ export class DefaultGameScene extends Scene{
     });
     this.ballSpeed = vec(250, 250);
     this._ball.body.collisionType = CollisionType.Passive;
-    
+
     this.colliding = false;
     this.alert = new Alert();
-    
-
   }
 
   public onInitialize(engine: Engine) {
@@ -63,27 +64,25 @@ export class DefaultGameScene extends Scene{
     engine.input.pointers.primary.on('move', (evt) => {
       if(!this.isPaused) this._padde.pos.x = evt.worldPos.x;
     });
-    
+
     this._ball.on('postupdate', () => { if(!this.isPaused) this.updateBall(engine); });
     this._ball.on('collisionstart', (event: CollisionStartEvent) => { this.ballColisionEnter(event, engine); });
     this._ball.on('collisionend', () => { this.ballColisionEnd(); });
-    this._ball.on('exitviewport', () => { this.Lose(engine);})
+    this._ball.on('exitviewport', () => { this.Lose(engine);});
 
     this.genBricks(engine);
-    
+
     this.alert = new Alert({
       height: engine.screen.canvasHeight,
       width: engine.screen.canvasWidth,
       pos: engine.screen.center,
       color: Color.fromRGB(1,1,1,0.5)
     });
-    
-    this.alert.events.on("closed", () => {engine.remove(this.alert); this.engine.goToScene('menu');});
-    
+
+    this.alert.events.on('closed', () => {engine.remove(this.alert); this.engine.goToScene('menu');});
   }
 
   public onActivate(context: SceneActivationContext<unknown>) {
-
     this._bricks.forEach(b => { if(b.isKilled())context.engine.add(b); });
     this._ball.pos = this.ballFirstPosition;
 
@@ -92,7 +91,6 @@ export class DefaultGameScene extends Scene{
     }, 1000);
 
     this.isPaused = false;
-    
   }
 
   private genBricks(engine: Engine){
@@ -158,13 +156,12 @@ export class DefaultGameScene extends Scene{
     if (this._bricks.every(b=> b.isKilled())){
       this.Win(engine);
     }
-    
+
     // reverse course after any collision
     // intersections are the direction body A has to move to not be clipping body B
-    // `ev.content.mtv` "minimum translation vector" is a vector `normalize()` will make the length of it 1
-    // `negate()` flips the direction of the vector
+    // `ev.contact.mtv` "minimum translation vector" is a vector `normalize()` will make the length of it 1
     const intersection = event.contact.mtv.normalize();
-    
+
     // Only reverse direction when the collision starts
     // Object could be colliding for multiple frames
     if (!this.colliding) {
@@ -176,7 +173,6 @@ export class DefaultGameScene extends Scene{
         this._ball.vel.y *= -1;
       }
     }
-
   }
 
   private ballColisionEnd(){
@@ -184,32 +180,19 @@ export class DefaultGameScene extends Scene{
   }
 
   private Lose(engine: Engine){
-    //alert('You lose!');
     this.pause();
-    this.alert.Text = "You lose!"
+    this.alert.Text = 'You lose!';
     engine.add(this.alert);
-    //this.engine.goToScene('menu');
   }
 
   private Win(engine: Engine){
-    //alert('You Win!');
     this.pause();
-    this.alert.Text = "You Win!"
+    this.alert.Text = 'You Win!';
     engine.add(this.alert);
-    //this.engine.goToScene('menu');
   }
 
   private pause(){
     this.isPaused = true;
     this._ball.vel = vec(0,0);
   }
-
-
-
-  public onDeactivate(ctx: SceneActivationContext) {
-    //this.saveState();
-  }
-  
 }
- 
-  

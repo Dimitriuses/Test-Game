@@ -1,4 +1,3 @@
-//import { Actor, Color, vec, Vector } from 'excalibur';
 import * as ex from 'excalibur';
 import { ActorEvents } from 'excalibur/build/dist/Actor';
 
@@ -6,10 +5,13 @@ export interface ButtonsEvents {
   click: ex.GameEvent<ActorEvents>;
 }
 
+/**
+ * A rectangle with a text label. Hovering swaps in `hoverColor`; a toggle button keeps
+ * the hover colour while it is switched on instead.
+ */
 export class Button extends ex.Actor {
   private _text: string;
   private _textBox: ex.Text;
-  //private isCliced: boolean = false;
 
   private _firstColor: ex.Color;
   private _hoverColor: ex.Color;
@@ -17,19 +19,18 @@ export class Button extends ex.Actor {
   private _togleStatus: boolean;
   public get TogleStatus(): boolean { return this._togleStatus; }
 
-
-
-  public get Text(): string {return this._text};
-  public set Text(value: string) { this._text = value; this._textBox.text = value;};
+  public get Text(): string {return this._text;}
+  public set Text(value: string) { this._text = value; this._textBox.text = value; }
 
   public events = new ex.EventEmitter<ActorEvents & ButtonsEvents>();
+
   constructor(config?: ex.ActorArgs, text?:string, hoverColor?:ex.Color, isTogle?: boolean) {
     super(config);
 
     this.color = config?.color ?? ex.Color.White;
     this._firstColor = this.color;
     this._hoverColor = hoverColor ?? this.color;
-    this._text = text ?? "Text";
+    this._text = text ?? 'Text';
 
     this._textBox = new ex.Text({text: this._text});
     const textActor: ex.Actor = new ex.Actor();
@@ -39,24 +40,17 @@ export class Button extends ex.Actor {
     this._isTogle = isTogle ?? false;
     this._togleStatus = false;
 
-    //console.log("init on pointer up " + this._isTogle)
-    
     this.on('pointerup', () => {
-      //console.log("I've been clicked");
       this.onClick();
-    })
- 
-    this.on('pointerenter', () => {
-      //console.log('enter');
-      this.onEnter();
-    });
-  
-    this.on('pointerleave', () => {
-      //console.log('leave');
-      this.onLeave();
     });
 
-    
+    this.on('pointerenter', () => {
+      this.onEnter();
+    });
+
+    this.on('pointerleave', () => {
+      this.onLeave();
+    });
   }
 
   private onEnter(){
@@ -81,11 +75,6 @@ export class Button extends ex.Actor {
         this._togleStatus = true;
       }
     }
-    this.events.emit("click");
+    this.events.emit('click');
   }
-
-
-
-
 }
-

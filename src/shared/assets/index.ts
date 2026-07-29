@@ -1,1 +1,1 @@
-export * from "./imades/index";
+export * from './imades/index';

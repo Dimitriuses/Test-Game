@@ -1,32 +1,29 @@
-// my-loader.ts
 import * as ex from 'excalibur';
+
+/**
+ * The engine-level loader. Excalibur's lifecycle hooks are all overridden here so the
+ * loading progress can be watched from the console while assets come in.
+ */
 export class MainLoader extends ex.DefaultLoader {
-  override onUpdate(engine: ex.Engine, elapsedMilliseconds: number): void {
-    // Perform something every tick, for example collect time elapsed or check 
-    // what file names have been loaded for drawing!
+  override onUpdate(): void {
+    // Called every tick while loading — `progress` is a number in [0, 1].
     console.log(this.progress);
   }
-  override onDraw(ctx: CanvasRenderingContext2D) {
-    // Returns the progress of the loader as a number between [0, 1] inclusive.
+
+  override onDraw() {
     console.log(this.progress);
   }
+
   override async onUserAction(): Promise<void> {
-    // Return a promise that resolves when the user interacts with the loading screen in some way,
-    // usually a click.
-    //
-    // It's important to implement this in order to unlock the audio context in the browser.
-    // Browsers automatically prevent audio from playing until the user performs an action.
-     
+    // Resolves as soon as it is called, so the loader does not wait for a click.
+    // Browsers keep audio locked until the user interacts; this game has no audio.
   }
+
   override async onBeforeLoad(): Promise<void> {
-    console.log("Hello Loader");
-    // Overrideable lifecycle method, called directly before loading starts
-    // Useful if you need to do anything to the screen/viewport
+    console.log('Hello Loader');
   }
+
   override async onAfterLoad(): Promise<void> {
-    // Overrideable lifecycle method, called after loading has completed
-    // Useful if you need to do anything to the screen/viewport
+    // Nothing to do once loading has finished.
   }
 }
-
-export const mainLoader = new MainLoader();

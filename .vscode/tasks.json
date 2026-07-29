@@ -3,13 +3,40 @@
   "tasks": [
     {
       "type": "npm",
+      "script": "start",
+      "isBackground": true,
+      "problemMatcher": [],
+      "label": "npm: start",
+      "detail": "parcel dev server on http://localhost:1234"
+    },
+    {
+      "type": "npm",
       "script": "build",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "label": "npm: build",
+      "detail": "parcel production build into dist/"
+    },
+    {
+      "type": "npm",
+      "script": "typecheck",
       "problemMatcher": [
         "$tsc"
       ],
-      "group": "build",
-      "label": "npm: build",
-      "detail": "tsc"
+      "label": "npm: typecheck",
+      "detail": "tsc --noEmit"
+    },
+    {
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "label": "npm: lint",
+      "detail": "eslint src/**/*.ts"
     }
   ]
 }

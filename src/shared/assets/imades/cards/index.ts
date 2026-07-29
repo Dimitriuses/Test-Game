@@ -1,8 +1,6 @@
 import { ImageSource } from 'excalibur';
 
-declare module "*.png";
-
-import twoClubs from "./2C.png";
+import twoClubs from './2C.png';
 import twoDiamonds from './2D.png';
 import twoHearts from './2H.png';
 import twoSpades from './2S.png';
@@ -144,9 +142,4 @@ export const CardResources = {
   Joker: new ImageSource(joker),
   CardBack: new ImageSource(cardBack),
 
-} as const
-
-
-
-enum CardValue {Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Joker};
-enum CardType { Clubs, Diamonds, Hearts, Spades };
+} as const;
