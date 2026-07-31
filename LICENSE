@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party assets:
-
-The playing-card and player-avatar images under `src/shared/assets/imades/` are from the
-Card Asset Pack by natomarcacini, released under Creative Commons Zero (CC0 1.0) and
-therefore free of restrictions. Credited in docs/ASSETS.md as a courtesy; CC0 requires no
-attribution.
-
-`cards/joker.png` and `players/char_los.png` are original to this repository and are
-covered by the MIT licence above.
